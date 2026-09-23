@@ -2,8 +2,8 @@ Package: speccal
 Title: Calibrated Inference for Specification Curve Analysis
 Version: 0.0.0.9000
 Authors@R: c(
-    person("Peng", "Huang", , "[待补邮箱]", role = c("aut", "cre")),
-    person("Rui", "Zhang", , "[待补邮箱]", role = c("aut", "cph")))
+    person("Peng", "Huang", , "hp@zjkq.com.cn", role = c("aut", "cre")),
+    person("Rui", "Zhang", , "hdd0318@163.com", role = c("aut", "cph")))
 Description: Inference and calibration layer for specification curve
     (multiverse) analysis: survey-design grid fitting, Freedman-Lane
     permutation nulls, a null-based criterion for defensible
