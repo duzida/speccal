@@ -33,6 +33,7 @@ spec_summary <- function(grid, null = NULL, keep = NULL, alpha = 0.05, direction
   direction <- match.arg(direction)
   G <- as.data.frame(grid)
   if (!is.null(keep)) { stopifnot(length(keep) == nrow(G)); G <- G[keep, ] }
+  if (!nrow(G)) stop("no specifications selected (keep is all FALSE)")
   ax <- attr(grid, "axis_cols")
   G$.key <- do.call(paste, c(G[ax], sep = "\r"))
   out <- lapply(unique(G$exposure), function(e) {

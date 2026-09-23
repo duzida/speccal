@@ -13,8 +13,10 @@ test_that("spec_defensible flags under-adjusted levels under a confounded fl nul
   expect_true(d0$defensible[d0$axis == "covset" & d0$level == "demo"])
   expect_true(all(d0$lo <= d0$fpr & d0$fpr <= d0$hi))
   expect_true(all(d0$n_specs[d0$axis == "covset"] == nrow(g) / 2))
+  expect_warning(spec_defensible(nul, within = list(covset = c("crude", "demo"))), "themselves not defensible")
   keep <- spec_keep(def, g)
   expect_equal(length(keep), nrow(g))
+  expect_error(spec_summary(g, keep = rep(FALSE, nrow(g))), "no specifications selected")
   expect_true(all(g$covset[keep] == "demo")); expect_false(any(keep & g$covset == "crude"))
 })
 

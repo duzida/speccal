@@ -23,7 +23,7 @@ A data frame with 10,108 rows and 47 columns:
 National Health and Nutrition Examination Survey 2009-2014, \url{https://wwwn.cdc.gov/nchs/nhanes/}
 }
 \usage{
-data(nhanes_perio)
+nhanes_perio
 }
 \description{
 The participant-level analytic file of the accompanying paper: 10,108 adults

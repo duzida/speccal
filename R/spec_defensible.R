@@ -55,6 +55,12 @@ spec_defensible <- function(null, threshold = 0.10, sensitivity = c(0.075, 0.15)
     }
   }
   out <- do.call(rbind, rows); rownames(out) <- NULL
+  if (!is.null(within)) {
+    bad_w <- out$level[out$axis == wax & out$level %in% wlv & !out$defensible]
+    if (length(bad_w)) warning("within-level(s) ", paste(bad_w, collapse = ", "), " of axis '", wax,
+      "' are themselves not defensible; the other axes are assessed inside inadequately adjusted models ",
+      "and their false-positive rates are inflated. Restrict `within` to defensible levels.", call. = FALSE)
+  }
   structure(out, class = c("spec_defensible", "data.frame"), threshold = threshold, sensitivity = sensitivity,
             alpha = alpha, within = within, restrict = null$restrict, B = length(null$reps))
 }
