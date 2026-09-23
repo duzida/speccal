@@ -1,0 +1,25 @@
+#' NHANES 2009-2014 analytic sample: blood-derived inflammatory markers and periodontitis
+#'
+#' The participant-level analytic file of the accompanying paper: 10,108 adults
+#' aged 30 years or older with a complete periodontal examination, laboratory
+#' data and (singly imputed) covariates, derived from the public NHANES
+#' 2009-2014 files. Eleven periodontitis case definitions were recomputed from
+#' the site-level examination records (CDC/AAP 2012 at three severity levels
+#' and applied to all six sites; 2018 EFP/AAP surveillance adaptation at 1, 2,
+#' 3 and 4 mm interdental thresholds; three Stage IV tooth-count rules).
+#'
+#' @format A data frame with 10,108 rows and 47 columns:
+#' \describe{
+#'   \item{SEQN}{NHANES participant identifier}
+#'   \item{SDMVSTRA, SDMVPSU, WT_TOTAL}{Survey strata, primary sampling units and the six-year examination weight}
+#'   \item{y_cdc_any, y_cdc_modsev, y_cdc_severe, y_allsites}{CDC/AAP 2012 any, moderate-to-severe, severe; CDC/AAP applied to all six sites (0/1)}
+#'   \item{y_efp1, y_efp2, y_efp3, y_efp4}{2018 EFP/AAP surveillance adaptation at 1, 2, 3, 4 mm (0/1)}
+#'   \item{y_st4_pairs, y_st4_t20, y_st4_jaw10}{Stage IV by fewer than 10 opposing pairs, fewer than 20 teeth, fewer than 10 teeth in either jaw (0/1)}
+#'   \item{WBC, ANC, AGR}{White blood cell count, neutrophil count (10^9/L), albumin-to-globulin ratio}
+#'   \item{SII, dNLR, NLR, LMR, PIV, SIRI, PLR}{Complete blood count-derived composite indices}
+#'   \item{NEU, LYM, MON, PLT, ALB, GLOB}{Constituents: neutrophils, lymphocytes, monocytes, platelets, albumin, globulin}
+#'   \item{Age, Gender, Race, Educational_level, PIR, Marriage_ststus, Smoking_status, Drinking_status, Flossing, BMI, Diabetes, Hypertension, Cardiovascular_disease, Hyperlipidemia, Arthritis, HbA1c}{Covariates (imputed where missing; factors except Age, PIR and HbA1c)}
+#'   \item{complete_case}{1 if all 16 covariates were observed}
+#' }
+#' @source National Health and Nutrition Examination Survey 2009-2014, \url{https://wwwn.cdc.gov/nchs/nhanes/}
+"nhanes_perio"
