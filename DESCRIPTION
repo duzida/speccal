@@ -1,0 +1,27 @@
+Package: speccal
+Title: Calibrated Inference for Specification Curve Analysis
+Version: 0.0.0.9000
+Authors@R: c(
+    person("Peng", "Huang", , "[待补邮箱]", role = c("aut", "cre")),
+    person("Rui", "Zhang", , "[待补邮箱]", role = c("aut", "cph")))
+Description: Inference and calibration layer for specification curve
+    (multiverse) analysis: survey-design grid fitting, Freedman-Lane
+    permutation nulls, a null-based criterion for defensible
+    specifications, calibrated summaries and variance decomposition, a
+    constraint test for composite indices, and boundary diagnostics for
+    breakpoints.
+License: MIT + file LICENSE
+Config/roxygen2/version: 8.1.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Suggests:
+    specr,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Imports: 
+    dplyr,
+    ggplot2,
+    parallel,
+    patchwork,
+    stats,
+    survey
