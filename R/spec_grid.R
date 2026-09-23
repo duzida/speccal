@@ -46,7 +46,7 @@ axis_cols <- function(grid) attr(grid, "axis_cols")
 ## keep attributes through base subsetting
 #' @export
 `[.spec_grid` <- function(x, i, j, ..., drop = FALSE) {
-  at <- attributes(x)[c("axes", "exposure", "axis_cols", "refit")]
+  at <- attributes(x)[c("axes", "exposure", "axis_cols", "refit", "context")]
   out <- NextMethod()
   if (is.data.frame(out)) { for (nm in names(at)) attr(out, nm) <- at[[nm]]; class(out) <- c("spec_grid", "data.frame") }
   out

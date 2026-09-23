@@ -24,8 +24,9 @@
 #'   `se`, `or`, `lo`, `hi`, `p`, `rd`, `rd_se`, `p_rd`, `rr`, `lrr_se`, `p_rr`,
 #'   `base_risk`, `prevalence`, `n`, `design_df`, `converged`, `iter`,
 #'   `max_abs_b`, `max_abs_se`, `sep_flag`. Attributes `axes`, `exposure`,
-#'   `refit` (a function `refit(data)` that repeats the fit on new data with the
-#'   same design structure; used by [spec_null()]).
+#'   `refit` (a function `refit(newdata, axes_new, cores)` that repeats the fit
+#'   on new data with the same design structure, optionally on a restricted set
+#'   of axes; used by [spec_null()]) and `context` (the data and design).
 #' @export
 spec_fit <- function(axes, data, design = NULL, exposure, marginal = TRUE, cores = 1L, quiet = FALSE) {
   stopifnot(inherits(axes, "spec_axes"), is.data.frame(data), is.character(exposure), length(exposure) >= 1)
@@ -45,14 +46,14 @@ spec_fit <- function(axes, data, design = NULL, exposure, marginal = TRUE, cores
   out <- do.call(rbind, res); rownames(out) <- NULL
   out <- .order_grid(out, axes, exposure)
   ax_cols <- c("outcome", "covset", "coding", names(axes$subsets), "weight")
-  refit <- function(newdata, cores = 1L) {
+  refit <- function(newdata, axes_new = axes, cores = 1L) {
     stopifnot(nrow(newdata) == nrow(data))
     des <- design
     if (!is.null(des)) des$variables <- newdata
-    spec_fit(axes, newdata, des, exposure, marginal = marginal, cores = cores, quiet = TRUE)
+    spec_fit(axes_new, newdata, des, exposure, marginal = marginal, cores = cores, quiet = TRUE)
   }
   structure(out, class = c("spec_grid", "data.frame"), axes = axes, exposure = exposure,
-            axis_cols = ax_cols, refit = refit)
+            axis_cols = ax_cols, refit = refit, context = list(data = data, design = design))
 }
 
 .blas_threads_unset <- function() {

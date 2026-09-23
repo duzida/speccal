@@ -38,8 +38,9 @@ exposure, columns \code{exposure}, the axis columns, \code{estimate} (log odds r
 \code{se}, \code{or}, \code{lo}, \code{hi}, \code{p}, \code{rd}, \code{rd_se}, \code{p_rd}, \code{rr}, \code{lrr_se}, \code{p_rr},
 \code{base_risk}, \code{prevalence}, \code{n}, \code{design_df}, \code{converged}, \code{iter},
 \code{max_abs_b}, \code{max_abs_se}, \code{sep_flag}. Attributes \code{axes}, \code{exposure},
-\code{refit} (a function \code{refit(data)} that repeats the fit on new data with the
-same design structure; used by \code{\link[=spec_null]{spec_null()}}).
+\code{refit} (a function \code{refit(newdata, axes_new, cores)} that repeats the fit
+on new data with the same design structure, optionally on a restricted set
+of axes; used by \code{\link[=spec_null]{spec_null()}}) and \code{context} (the data and design).
 }
 \description{
 Fits one logistic model per specification and exposure. Survey-weighted
