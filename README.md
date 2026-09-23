@@ -20,8 +20,12 @@ adds what comes after the curve and what complex-survey data need before it:
 - **Breakpoint boundary diagnostics** (`breakpoint_boot`): naive and Rao–Wu bootstrap, share of replicates on
   the search bounds, and sensitivity to the search range.
 
-Status: **in development** (v0.0.0.9000). `spec_axes`, `spec_fit` and `as_spec_grid` are implemented and
-reproduce the primary grid of the accompanying paper to machine precision (`inst/reproduce/01_grid.R`).
+Status: **v0.0.0.9000, all planned functions implemented** (`spec_axes`, `spec_fit`, `as_spec_grid`,
+`spec_null`, `spec_defensible`, `spec_keep`, `spec_summary`, `spec_decompose`, `composite_constraint`,
+`composite_coefficients`, `breakpoint_boot`, and `plot()` methods). Every function reproduces the
+corresponding result of the accompanying paper from the archived ledger to machine precision
+(`inst/reproduce/01`–`05`; 15,840 specifications, 300-replicate null, 1,056 constraint tests, 200
+Rao–Wu replicates). 109 unit tests.
 
 ## Installation
 
@@ -41,8 +45,16 @@ ax  <- spec_axes(
                     full  = c("Age", "Gender", "Race", "Smoking", "BMI")),
   coding     = c("per_sd", "log2", "q4_vs_q1"),
   sample     = list(all = TRUE, age40 = quote(Age >= 40)))
-g <- spec_fit(ax, nh, design = des, exposure = c("WBC", "NLR"), cores = 8)
-g
+g   <- spec_fit(ax, nh, design = des, exposure = c("WBC", "NLR"), cores = 8)
+nul <- spec_null(g, scheme = "fl", B = 300, stratum = "SDMVSTRA", covariates = c("Age", "Gender", "Race", "Smoking", "BMI"),
+                 restrict = list(weight = "design"), cores = 8)
+def <- spec_defensible(nul, threshold = 0.10, within = list(covset = "full"))
+keep <- spec_keep(def, g)
+sm  <- spec_summary(g, nul, keep = keep)       # share significant, permutation P, effective number of specifications
+vd  <- spec_decompose(g, nul, interactions = TRUE, equal_cardinality = list(axis = "outcome", k = 1))
+ct  <- composite_constraint(nh, des, composite = "NLR", constituents = c(NEU = 1, LYM = -1), axes = ax)
+bp  <- breakpoint_boot(nh, des, "NLR", "y_cdc_any", covariates = c("Age", "Gender", "Race", "Smoking", "BMI"))
+plot(g, keep = keep); plot(def); plot(sm, nul, keep, g); plot(vd); plot(bp)
 ```
 
 ## Reproducing the paper
