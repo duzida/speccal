@@ -2,6 +2,7 @@
 NULL
 
 ## ggplot2 methods. Colours: one signal colour for significance, one for the Freedman-Lane null, neutral greys otherwise.
+.plain <- function(x) { x <- as.data.frame(x); class(x) <- "data.frame"; attributes(x)[setdiff(names(attributes(x)), c("names", "row.names", "class"))] <- NULL; x }
 .pal <- list(sig = "#b8322a", fl = "#1f6f8b", simple = "grey62", off = "grey82", ns = "grey30", def = "#b8322a", cov = "#d4912a")
 
 .theme_speccal <- function(base_size = 9) {
@@ -25,7 +26,7 @@ NULL
 #' @return A ggplot object.
 #' @export
 plot.spec_grid <- function(x, keep = NULL, alpha = 0.05, ylim = c(0.2, 10), nrow = 2, ...) {
-  d <- as.data.frame(x)
+  d <- .plain(x)
   d$keep <- if (is.null(keep)) TRUE else keep
   d$cls <- ifelse(!d$keep, "Not defensible", ifelse(d$p < alpha, sprintf("Defensible, P < %g", alpha), "Defensible, not significant"))
   if (is.null(keep)) d$cls <- ifelse(d$p < alpha, sprintf("P < %g", alpha), "Not significant")
@@ -52,7 +53,7 @@ plot.spec_grid <- function(x, keep = NULL, alpha = 0.05, ylim = c(0.2, 10), nrow
 #' @return A ggplot object.
 #' @export
 plot.spec_defensible <- function(x, ...) {
-  d <- as.data.frame(x); thr <- attr(x, "threshold"); sens <- attr(x, "sensitivity")
+  d <- .plain(x); thr <- attr(x, "threshold"); sens <- attr(x, "sensitivity")
   d$status <- ifelse(d$defensible, sprintf("At or below %g%%", 100 * thr), sprintf("Above %g%% (not defensible)", 100 * thr))
   d$level <- factor(d$level, levels = rev(unique(d$level))); d$axis <- factor(d$axis, levels = unique(d$axis))
   ggplot2::ggplot(d, ggplot2::aes(100 * .data$fpr, .data$level)) +
@@ -77,7 +78,7 @@ plot.spec_defensible <- function(x, ...) {
 #' @return A ggplot object.
 #' @export
 plot.spec_summary <- function(x, null = NULL, keep = NULL, grid = NULL, ...) {
-  d <- as.data.frame(x); d$exposure <- factor(d$exposure, levels = rev(d$exposure))
+  d <- .plain(x); d$exposure <- factor(d$exposure, levels = rev(d$exposure))
   p <- ggplot2::ggplot() + ggplot2::labs(x = sprintf("Specifications significant in the modal direction (%%)"), y = NULL) + .theme_speccal()
   if (!is.null(null) && "p_perm" %in% names(d)) {
     P <- null$perm; a <- attr(x, "alpha")

@@ -3,3 +3,6 @@
 .RData
 .DS_Store
 inst/reproduce/logs/
+doc/
+Meta/
+inst/doc/

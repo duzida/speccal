@@ -1,0 +1,233 @@
+---
+title: "Calibrated specification curve analysis with speccal"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Calibrated specification curve analysis with speccal}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5, dpi = 96)
+Sys.setenv(OMP_NUM_THREADS = "1")
+```
+
+A specification curve (multiverse) analysis fits every analysis a reasonable investigator could have run
+and reports the distribution of estimates. Existing tools stop there. `speccal` adds the inference:
+which specifications are defensible, whether the share of significant specifications exceeds what
+confounding alone produces, how many of the specifications are effectively independent, whether the
+analytic choice that moves the estimates most does so even when no association exists, and, for two
+common special cases, whether a composite index is a sound way to enter its constituents and whether a
+reported threshold is located by the data.
+
+This vignette walks through the workflow on the bundled dataset `nhanes_perio`: 10,108 adults from
+NHANES 2009-2014 with eleven periodontitis case definitions, ten blood-derived inflammatory markers
+and their constituents, and 16 covariates. The accompanying paper analyses a grid of 15,840
+specifications; to keep this document quick to build we use a smaller grid and fewer permutations. The
+scripts in `inst/reproduce/` run the full analysis and check every number against the paper's ledger.
+
+## 1. Data and survey design
+
+```{r data}
+library(speccal)
+library(survey)
+data(nhanes_perio)
+options(survey.lonely.psu = "adjust")
+des <- svydesign(id = ~SDMVPSU, strata = ~SDMVSTRA, weights = ~WT_TOTAL, data = nhanes_perio, nest = TRUE)
+degf(des)
+```
+
+Everything that follows is design-based: weights, strata and primary sampling units enter every model,
+and restricted samples are handled as domains (`subset()` on the design), never by filtering the data
+before the design is built.
+
+## 2. Define the axes
+
+An axis is one analytic choice with two or more levels. Here: four case definitions, four nested
+covariate sets (crude, demographics, plus socio-behavioural factors, plus clinical factors), two exposure
+parameterisations and two sample restrictions, all design-based.
+
+```{r axes, code = readLines("axes.R")}
+```
+
+```{r axes-print}
+ax
+```
+
+`efp2` is the 2018 EFP/AAP surveillance adaptation at a 2 mm interdental threshold, which classifies 96%
+of adults as cases. It is included deliberately: the point of the next steps is to let the data, not
+the analyst, decide whether such a level belongs in the primary analysis.
+
+## 3. Fit the grid
+
+Three exposures: the white blood cell count, the neutrophil-to-lymphocyte ratio and the
+albumin-to-globulin ratio.
+
+The two steps that refit many models (the grid and the permutation null) take several minutes; their
+results ship with the package so that this document builds quickly. The code is shown as it was run
+(`data-raw/vignette_objects.R`).
+
+```{r fit, eval = FALSE}
+g <- spec_fit(ax, nhanes_perio, design = des, exposure = c("WBC", "NLR", "AGR"), cores = 8)
+```
+
+```{r load, include = FALSE}
+obj <- readRDS(system.file("extdata", "vignette_objects.rds", package = "speccal"))
+g <- obj$g; nul <- obj$nul
+```
+
+```{r fit-print}
+g
+head(as.data.frame(g)[, c("exposure", "outcome", "covset", "coding", "sample", "or", "p", "rr", "p_rr", "sep_flag")])
+```
+
+Every fit carries diagnostics: convergence, iteration count, the largest absolute coefficient and
+standard error, and a quasi-separation flag. Marginal risk ratios and risk differences are computed by
+standardisation, so conclusions can be checked on collapsible scales.
+
+```{r curve, fig.height = 3.2}
+plot(g)
+```
+
+## 4. A null distribution that keeps confounding intact
+
+The usual permutation test shuffles the exposure across participants. That also destroys the
+association between the exposure and the covariates, so it tests a world in which confounding does not
+exist and is anticonservative whenever the exposure is confounded. The Freedman-Lane scheme regresses
+the (log) exposure on the covariates, keeps the fitted part and permutes only the residuals within
+strata. The null is then "no association given the covariates".
+
+```{r null, eval = FALSE}
+nul <- spec_null(g, scheme = "fl", B = 100, stratum = "SDMVSTRA", covariates = ax$covariates$full,
+                 seed = 1, cores = 8)
+```
+
+```{r null-print}
+covs_full <- ax$covariates$full
+nul
+```
+
+One hundred permutations are enough to illustrate the machinery; the paper uses 300, and levels whose
+false-positive rate lies close to the threshold need that many to be classified reliably. Every replicate is stored
+specification by specification, which is what the calibration below needs.
+
+## 5. Let the null define which specifications are defensible
+
+For every level of every axis, the false-positive rate under the null is the share of null
+specifications with P < 0.05. The threshold (here 10%, twice the nominal level) is set before looking at
+the observed results. Case definitions and codings are assessed within the two adequately adjusted
+covariate sets so that their behaviour is separated from residual confounding. The `within` levels must themselves
+be defensible; `spec_defensible()` warns if they are not, because assessing a definition inside a
+confounded model inflates its false-positive rate.
+
+```{r defensible}
+def <- spec_defensible(nul, threshold = 0.10, within = list(covset = c("socio", "full")))
+def
+plot(def)
+keep <- spec_keep(def, g)
+table(keep)
+table(spec_keep(def, g, threshold = 0.15))   # sensitivity threshold
+```
+
+Not every classification is clear-cut. In this small grid the full-sample level has a false-positive rate
+just above 10% with an interval that includes the threshold, so it is excluded at 10% and retained at 15%.
+Borderline levels are exactly why the threshold is fixed in advance and the results are reported at the
+sensitivity thresholds as well.
+
+The crude and demographics-only models produce false positives far above the nominal rate and are
+excluded, as is the near-saturated 2 mm definition, whose models inherit the instability of an outcome
+with almost no non-cases. The interval on each rate
+comes from the variation across permutations, because the specifications within one permutation are
+correlated and a binomial interval would be too narrow. The criterion cannot detect over-adjustment: a
+null of no association produces no false positives when a collider is adjusted. Pair it with a causal
+argument for the covariates that are contested.
+
+## 6. Calibrated summary: how much of "80% significant" is real?
+
+```{r summary}
+sm <- spec_summary(g, nul, keep = keep)
+sm
+plot(sm, null = nul, keep = keep, grid = g)
+```
+
+Three things are reported for each exposure that the raw share does not give:
+
+* `p_perm`: the probability, under the null, of a share of significant specifications in the modal
+  direction at least as large as the one observed.
+* `n_eff_var` and `n_eff_liji`: the effective number of independent specifications, from the variance of
+  the null share and from the eigenvalues of the correlation matrix of the estimates. Specifications of
+  one exposure share the same participants, so they behave like far fewer independent tests.
+* `ci_lo`, `ci_hi`: an approximate interval for the observed share using the effective number in place
+  of the nominal denominator. The permutation P value remains the formal test.
+
+## 7. Which analytic choice moves the estimate, and would it do so under the null?
+
+```{r decompose, fig.height = 6}
+vd <- spec_decompose(g, nul, interactions = TRUE, equal_cardinality = list(axis = "outcome", k = 2))
+vd
+plot(vd)
+```
+
+The decomposition is descriptive (the estimates are deterministic functions of one dataset), so no F
+tests are attached. Three safeguards are built in: pairwise interactions show how much of the residual
+is structured; the equal-cardinality draws show whether an axis dominates only because it has more
+levels; and the same decomposition under the null shows how large a share an axis attains when no
+association exists. A share that is as large under the null as in the data describes how that axis
+transmits confounding and sampling variability, not evidence about the association.
+
+## 8. Does a composite index impose a structure the data reject?
+
+On the log scale, NLR = log(neutrophils) - log(lymphocytes): entering NLR equals entering the two counts
+with coefficients constrained to +1 and -1 times a common slope. The constraint is testable.
+
+```{r constraint}
+ax_ct <- spec_axes(outcome = ax$outcome, covariates = ax$covariates, coding = "log2", sample = ax$subsets$sample)
+ct <- composite_constraint(nhanes_perio, des, composite = "NLR", constituents = c(NEU = 1, LYM = -1), axes = ax_ct)
+ct
+summary(ct, exclude = list(outcome = "efp2"))
+composite_coefficients(nhanes_perio, des, "NLR", c(NEU = 1, LYM = -1), outcome = "y_cdc_any", covariates = covs_full)
+```
+
+The neutrophil count carries the association and the lymphocyte count does not, whereas the ratio forces
+them to enter with equal weight and opposite sign. Compare with the albumin-to-globulin ratio, whose
+constraint the data accept:
+
+```{r constraint-agr}
+ct_agr <- composite_constraint(nhanes_perio, des, "AGR", c(ALB = 1, GLOB = -1), axes = ax_ct)
+ct_agr
+composite_coefficients(nhanes_perio, des, "AGR", c(ALB = 1, GLOB = -1), outcome = "y_cdc_any", covariates = covs_full)
+```
+
+## 9. Is a threshold located by the data or by the search range?
+
+A two-segment model is fitted on the log2 exposure with the breakpoint chosen by minimum deviance over a
+grid of candidates at fixed percentiles. The bootstrap distribution of the breakpoint, and in particular
+the share of replicates that select the first or last candidate, shows whether the interval is set by
+the data. The Rao-Wu rescaled bootstrap respects the survey design; the naive scheme is provided for
+comparison and understates the variance when strata contain few units.
+
+```{r breakpoint, fig.height = 3.5}
+bp <- breakpoint_boot(nhanes_perio, des, exposure = "AGR", outcome = "y_cdc_any", covariates = covs_full,
+                      grid = c(0.05, 0.95, 21), B = 100, resampling = "rao-wu", seed = 2,
+                      sensitivity_grid = c(0.15, 0.85, 13))
+bp
+plot(bp)
+```
+
+## 10. Reading the output together
+
+The workflow separates four claims that are usually reported as one. A specification curve shows how
+estimates vary; the null-based criterion says which of those specifications deserve to be counted; the
+permutation P value and the effective number say whether the share that survives is more than confounding
+produces and how precisely it is known; and the calibrated decomposition says whether the analytic choice
+that moves estimates most is evidence about the association or a property of the data structure. The
+constraint test and the breakpoint diagnostics address two specific habits of the biomarker literature:
+entering ratios without asking whether the ratio is the right combination, and reporting thresholds
+whose location the data cannot fix.
+
+## Reproducing the paper
+
+`system.file("reproduce", package = "speccal")` lists scripts that rebuild the full 15,840-specification
+grid, the 300-replicate null, the defensible subset, the variance decompositions, the 1,056 constraint
+tests and the breakpoint bootstraps from the public NHANES files, and compare each with the archived
+results ledger of the accompanying paper.

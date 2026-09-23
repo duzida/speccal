@@ -1,3 +1,6 @@
 ^LICENSE\.md$
 ^inst/reproduce/logs$
 ^README\.md$
+^doc$
+^Meta$
+^data-raw$

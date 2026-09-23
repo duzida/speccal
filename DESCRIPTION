@@ -13,10 +13,14 @@ Description: Inference and calibration layer for specification curve
 License: MIT + file LICENSE
 Config/roxygen2/version: 8.1.0
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 Suggests:
+    knitr,
+    rmarkdown,
     specr,
     testthat (>= 3.0.0)
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Imports: 
     ggplot2,
