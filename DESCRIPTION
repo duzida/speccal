@@ -3,7 +3,7 @@ Title: Calibrated Inference for Specification Curve Analysis
 Version: 0.0.0.9000
 Authors@R: c(
     person("Peng", "Huang", , "hp@zjkq.com.cn", role = c("aut", "cre")),
-    person("Rui", "Zhang", , "hdd0318@163.com", role = c("aut", "cph")))
+    person("Rui", "Zhang", , "zhangrui46@zju.edu.cn", role = c("aut", "cph")))
 Description: Inference and calibration layer for specification curve
     (multiverse) analysis: survey-design grid fitting, Freedman-Lane
     permutation nulls, a null-based criterion for defensible
