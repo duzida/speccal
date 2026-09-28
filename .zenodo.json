@@ -1,0 +1,12 @@
+{
+  "title": "speccal: Calibrated Inference for Specification Curve Analysis",
+  "upload_type": "software",
+  "description": "Inference and calibration layer for specification curve (multiverse) analysis: survey-design grid fitting, exposure-residual permutation nulls, a null-based criterion for defensible specifications, calibrated summaries and variance decomposition, a constraint test for composite indices, and boundary diagnostics for breakpoints.",
+  "creators": [
+    {"name": "Huang, Peng", "affiliation": "Stomatology Hospital, Zhejiang University School of Medicine"},
+    {"name": "Zhang, Rui", "affiliation": "Stomatology Hospital, Zhejiang University School of Medicine"}
+  ],
+  "license": "MIT",
+  "keywords": ["specification curve analysis", "multiverse analysis", "permutation test", "survey data", "R"],
+  "version": "0.1.0"
+}

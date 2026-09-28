@@ -1,6 +1,6 @@
 Package: speccal
 Title: Calibrated Inference for Specification Curve Analysis
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: c(
     person("Peng", "Huang", , "hp@zjkq.com.cn", role = c("aut", "cre")),
     person("Rui", "Zhang", , "zhangrui46@zju.edu.cn", role = c("aut", "cph")))
@@ -10,6 +10,8 @@ Description: Inference and calibration layer for specification curve
     specifications, calibrated summaries and variance decomposition, a
     constraint test for composite indices, and boundary diagnostics for
     breakpoints.
+URL: https://github.com/duzida/speccal
+BugReports: https://github.com/duzida/speccal/issues
 License: MIT + file LICENSE
 Config/roxygen2/version: 8.1.0
 Encoding: UTF-8
