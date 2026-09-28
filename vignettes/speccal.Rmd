@@ -93,12 +93,12 @@ plot(g)
 
 The usual permutation test shuffles the exposure across participants. That also destroys the
 association between the exposure and the covariates, so it tests a world in which confounding does not
-exist and is anticonservative whenever the exposure is confounded. The Freedman-Lane scheme regresses
+exist and is anticonservative whenever the exposure is confounded. The exposure-residual scheme regresses
 the (log) exposure on the covariates, keeps the fitted part and permutes only the residuals within
 strata. The null is then "no association given the covariates".
 
 ```{r null, eval = FALSE}
-nul <- spec_null(g, scheme = "fl", B = 100, stratum = "SDMVSTRA", covariates = ax$covariates$full,
+nul <- spec_null(g, scheme = "resid", B = 100, stratum = "SDMVSTRA", covariates = ax$covariates$full,
                  seed = 1, cores = 8)
 ```
 

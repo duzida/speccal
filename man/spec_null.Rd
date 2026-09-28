@@ -6,7 +6,7 @@
 \usage{
 spec_null(
   grid,
-  scheme = c("fl", "simple"),
+  scheme = c("resid", "simple", "fl"),
   B = 300L,
   reps = NULL,
   stratum = NULL,
@@ -25,7 +25,7 @@ spec_null(
 \item{grid}{A \code{spec_grid} produced by \code{\link[=spec_fit]{spec_fit()}} (or by \code{\link[=as_spec_grid]{as_spec_grid()}}
 with a \code{refit} function and \code{data}).}
 
-\item{scheme}{\code{"fl"} or \code{"simple"}.}
+\item{scheme}{\code{"resid"} or \code{"simple"} (\code{"fl"} is a deprecated alias of \code{"resid"}).}
 
 \item{B}{Number of permutations; ignored when \code{reps} is given.}
 
@@ -35,11 +35,13 @@ for verification against archived replicates). Defaults to \code{1:B}.}
 \item{stratum}{Name of the stratum variable in the data; permutation is
 within its levels. \code{NULL} permutes across the whole sample.}
 
-\item{covariates}{Character vector of covariate names for the Freedman-Lane
-regression (typically the fullest covariate set). Required for \code{"fl"}.}
+\item{covariates}{Character vector of covariate names for the residualisation
+regression (typically the fullest covariate set). Required for \code{"resid"}.
+Terms such as \code{splines::ns(age, 4)} may be given to use a non-linear
+residualisation model.}
 
 \item{transform, inverse}{Functions applied to the exposure before the
-Freedman-Lane regression and to map back afterwards (default \code{log}/\code{exp},
+residualisation regression and to map back afterwards (default \code{log}/\code{exp},
 appropriate for positive, right-skewed markers).}
 
 \item{restrict}{Named list restricting subset and weighting axes for the
@@ -70,12 +72,20 @@ association. Two schemes are available:
 }
 \details{
 \itemize{
-\item \code{"fl"} (default): within-stratum Freedman-Lane permutation. Each
-(transformed) exposure is regressed on the covariates in \code{covariates}; the
-fitted part is kept and only the residuals are permuted within strata. This
-removes the exposure-outcome association while preserving the association
-of the exposure with the covariates, so the null is "no association given
-the covariates", i.e. confounding is intact.
+\item \code{"resid"} (default): within-stratum exposure-residual permutation. Each
+(transformed) exposure is regressed on the covariates in \code{covariates} by
+least squares; the fitted part is kept and only the residuals are permuted
+within strata. This removes the exposure-outcome association while
+preserving the linear dependence of the exposure on the covariates, so the
+null is "no association given the covariates": under-adjusted
+specifications inherit the confounding that the residualisation model
+represents. For the fullest covariate set this is permutation of the
+orthogonalised exposure (the Smith method in Winkler et al. 2014); it is
+not Freedman-Lane permutation, which permutes outcome residuals. The null
+is conditional on \code{covariates} and on their functional form and cannot
+represent unmeasured or misspecified confounding; rebuild it with other
+residualisation models as a sensitivity analysis. \code{"fl"} is accepted as a
+deprecated alias.
 \item \code{"simple"}: within-stratum permutation of the exposure itself, which also
 breaks the exposure-covariate association and therefore tests a null in
 which confounding does not exist. It is anticonservative when the exposure

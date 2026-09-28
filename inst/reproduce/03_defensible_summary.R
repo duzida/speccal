@@ -32,7 +32,7 @@ perm <- data.frame(rep = N$rep, exposure = N$exposure, outcome = unname(INV$outc
                    coding = unname(INV$scale[N$scale]), missing = "imputed", sample = unname(INV$sample[N$sample]), weight = "design",
                    estimate = log(N$or), p = N$p, rr = N$rr, p_rr = N$p_rr, sep_flag = N$sep_flag, stringsAsFactors = FALSE)
 stopifnot(!anyNA(perm$outcome), !anyNA(perm$covset), !anyNA(perm$coding), !anyNA(perm$sample))
-nul <- structure(list(perm = perm, scheme = "fl", reps = sort(unique(perm$rep)), seed = 500000, stratum = "SDMVSTRA",
+nul <- structure(list(perm = perm, scheme = "resid", reps = sort(unique(perm$rep)), seed = 500000, stratum = "SDMVSTRA",
                       restrict = list(missing = "imputed", weight = "design"), axis_cols = axis_cols(g), exposures = EXPO), class = "spec_null")
 print(nul)
 

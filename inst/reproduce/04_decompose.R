@@ -63,7 +63,7 @@ N <- readRDS(file.path(B, "4_结果/4.2_置换与零分布/FL零分布_合并.rd
 perm <- data.frame(rep = N$rep, exposure = N$exposure, outcome = unname(INV$outcome[N$outcome]), covset = unname(INV$covset[N$covset]),
                    coding = unname(INV$scale[N$scale]), missing = "imputed", sample = unname(INV$sample[N$sample]), weight = "design",
                    estimate = log(N$or), p = N$p, stringsAsFactors = FALSE)
-nul <- structure(list(perm = perm, scheme = "fl", reps = 1:300, seed = 500000, stratum = "SDMVSTRA",
+nul <- structure(list(perm = perm, scheme = "resid", reps = 1:300, seed = 500000, stratum = "SDMVSTRA",
                       restrict = list(missing = "imputed", weight = "design"), axis_cols = axis_cols(g), exposures = EXPO), class = "spec_null")
 sub <- g$missing == "imputed" & g$weight == "design"
 vn <- spec_decompose(g, nul, keep = sub)

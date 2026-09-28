@@ -47,7 +47,7 @@ of the per-replicate rate across permutations, not from a binomial formula.
 }
 \details{
 The criterion detects levels that fail to control confounding (with a
-Freedman-Lane null) and outcome definitions that saturate; it cannot detect
+exposure-residual null) and outcome definitions that saturate; it cannot detect
 over-adjustment, because adjusting for a collider or mediator does not
 create false positives when there is no association.
 }
