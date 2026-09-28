@@ -1,0 +1,8 @@
+bibentry(
+  bibtype = "Manual",
+  title = "speccal: Calibrated Inference for Specification Curve Analysis",
+  author = c(person("Peng", "Huang"), person("Rui", "Zhang")),
+  year = "2026",
+  note = "R package version 0.1.0",
+  url = "https://github.com/duzida/speccal"
+)
