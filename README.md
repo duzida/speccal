@@ -7,7 +7,7 @@ adds what comes after the curve and what complex-survey data need before it:
 
 - **Survey-design grid fitting** (`spec_fit`): `survey::svyglm` with subsets as domains, marginal risk
   differences and risk ratios by standardisation, and convergence / quasi-separation diagnostics for every fit.
-- **Permutation nulls that preserve confounding** (`spec_null`): within-stratum Freedman–Lane permutation,
+- **Permutation nulls that preserve confounding** (`spec_null`): within-stratum exposure-residual permutation,
   saved specification by specification, alongside the simple permutation for comparison.
 - **A null-based criterion for defensible specifications** (`spec_defensible`): the false-positive rate of
   each level of each analytic choice under the null, with a prespecified threshold and sensitivity values.
@@ -46,7 +46,7 @@ ax  <- spec_axes(
   coding     = c("per_sd", "log2", "q4_vs_q1"),
   sample     = list(all = TRUE, age40 = quote(Age >= 40)))
 g   <- spec_fit(ax, nh, design = des, exposure = c("WBC", "NLR"), cores = 8)
-nul <- spec_null(g, scheme = "fl", B = 300, stratum = "SDMVSTRA", covariates = c("Age", "Gender", "Race", "Smoking", "BMI"),
+nul <- spec_null(g, scheme = "resid", B = 300, stratum = "SDMVSTRA", covariates = c("Age", "Gender", "Race", "Smoking", "BMI"),
                  restrict = list(weight = "design"), cores = 8)
 def <- spec_defensible(nul, threshold = 0.10, within = list(covset = "full"))
 keep <- spec_keep(def, g)

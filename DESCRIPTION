@@ -5,7 +5,7 @@ Authors@R: c(
     person("Peng", "Huang", , "hp@zjkq.com.cn", role = c("aut", "cre")),
     person("Rui", "Zhang", , "zhangrui46@zju.edu.cn", role = c("aut", "cph")))
 Description: Inference and calibration layer for specification curve
-    (multiverse) analysis: survey-design grid fitting, Freedman-Lane
+    (multiverse) analysis: survey-design grid fitting, exposure-residual
     permutation nulls, a null-based criterion for defensible
     specifications, calibrated summaries and variance decomposition, a
     constraint test for composite indices, and boundary diagnostics for

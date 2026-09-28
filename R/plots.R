@@ -1,7 +1,7 @@
 #' @importFrom ggplot2 .data
 NULL
 
-## ggplot2 methods. Colours: one signal colour for significance, one for the Freedman-Lane null, neutral greys otherwise.
+## ggplot2 methods. Colours: one signal colour for significance, one for the exposure-residual null, neutral greys otherwise.
 .plain <- function(x) { x <- as.data.frame(x); class(x) <- "data.frame"; attributes(x)[setdiff(names(attributes(x)), c("names", "row.names", "class"))] <- NULL; x }
 .pal <- list(sig = "#b8322a", fl = "#1f6f8b", simple = "grey62", off = "grey82", ns = "grey30", def = "#b8322a", cov = "#d4912a")
 

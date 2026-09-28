@@ -1,4 +1,4 @@
-## 验收 2：用 speccal 的 spec_null(scheme="fl") 以论文原种子重跑若干次置换，与存档分片
+## 验收 2：用 speccal 的 spec_null(scheme="resid") 以论文原种子重跑若干次置换，与存档分片
 ##         4_结果/4.2_置换与零分布/FL零分布完整网格/fl_XXX.csv 逐设定核对（不重跑全部 300 次）
 ## 用法：OMP_NUM_THREADS=1 Rscript inst/reproduce/02_null.R [reps, 如 1:20] [cores]
 suppressMessages({library(survey); library(dplyr); devtools::load_all(Sys.getenv("SPECCAL_DIR", "."), quiet = TRUE)})
@@ -22,7 +22,7 @@ des <- svydesign(id = ~SDMVPSU, strata = ~SDMVSTRA, weights = ~WT_TOTAL, data = 
 ## 观察网格只需子网格（零分布用 refit，不依赖观察网格的内容）
 g <- spec_fit(restrict_axes(ax, list(missing = "imputed", weight = "design")), d, des, exposure = EXPO, cores = CORES, quiet = TRUE)
 t0 <- Sys.time()
-nul <- spec_null(g, scheme = "fl", reps = REPS, stratum = "SDMVSTRA", covariates = COV[["全模型"]],
+nul <- spec_null(g, scheme = "resid", reps = REPS, stratum = "SDMVSTRA", covariates = COV[["全模型"]],
                  seed = 500000, cores = CORES)     # fl_null_full.R: set.seed(500000 + b)
 cat("置换", length(REPS), "次，用时", round(difftime(Sys.time(), t0, units = "mins"), 1), "分钟\n"); print(nul)
 

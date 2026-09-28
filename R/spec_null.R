@@ -4,12 +4,20 @@
 #' distribution of estimates and P values under a null of no exposure-outcome
 #' association. Two schemes are available:
 #'
-#' * `"fl"` (default): within-stratum Freedman-Lane permutation. Each
-#'   (transformed) exposure is regressed on the covariates in `covariates`; the
-#'   fitted part is kept and only the residuals are permuted within strata. This
-#'   removes the exposure-outcome association while preserving the association
-#'   of the exposure with the covariates, so the null is "no association given
-#'   the covariates", i.e. confounding is intact.
+#' * `"resid"` (default): within-stratum exposure-residual permutation. Each
+#'   (transformed) exposure is regressed on the covariates in `covariates` by
+#'   least squares; the fitted part is kept and only the residuals are permuted
+#'   within strata. This removes the exposure-outcome association while
+#'   preserving the linear dependence of the exposure on the covariates, so the
+#'   null is "no association given the covariates": under-adjusted
+#'   specifications inherit the confounding that the residualisation model
+#'   represents. For the fullest covariate set this is permutation of the
+#'   orthogonalised exposure (the Smith method in Winkler et al. 2014); it is
+#'   not Freedman-Lane permutation, which permutes outcome residuals. The null
+#'   is conditional on `covariates` and on their functional form and cannot
+#'   represent unmeasured or misspecified confounding; rebuild it with other
+#'   residualisation models as a sensitivity analysis. `"fl"` is accepted as a
+#'   deprecated alias.
 #' * `"simple"`: within-stratum permutation of the exposure itself, which also
 #'   breaks the exposure-covariate association and therefore tests a null in
 #'   which confounding does not exist. It is anticonservative when the exposure
@@ -22,16 +30,18 @@
 #'
 #' @param grid A `spec_grid` produced by [spec_fit()] (or by [as_spec_grid()]
 #'   with a `refit` function and `data`).
-#' @param scheme `"fl"` or `"simple"`.
+#' @param scheme `"resid"` or `"simple"` (`"fl"` is a deprecated alias of `"resid"`).
 #' @param B Number of permutations; ignored when `reps` is given.
 #' @param reps Integer vector of replicate indices to run (for resuming or
 #'   for verification against archived replicates). Defaults to `1:B`.
 #' @param stratum Name of the stratum variable in the data; permutation is
 #'   within its levels. `NULL` permutes across the whole sample.
-#' @param covariates Character vector of covariate names for the Freedman-Lane
-#'   regression (typically the fullest covariate set). Required for `"fl"`.
+#' @param covariates Character vector of covariate names for the residualisation
+#'   regression (typically the fullest covariate set). Required for `"resid"`.
+#'   Terms such as `splines::ns(age, 4)` may be given to use a non-linear
+#'   residualisation model.
 #' @param transform,inverse Functions applied to the exposure before the
-#'   Freedman-Lane regression and to map back afterwards (default `log`/`exp`,
+#'   residualisation regression and to map back afterwards (default `log`/`exp`,
 #'   appropriate for positive, right-skewed markers).
 #' @param restrict Named list restricting subset and weighting axes for the
 #'   null, e.g. `list(missing = "imputed", weight = "design")`; the null is
@@ -47,25 +57,26 @@
 #'   `rep`, `exposure`, axis columns, kept columns), `scheme`, `reps`, `seed`,
 #'   `stratum`, `restrict`, `axis_cols`.
 #' @export
-spec_null <- function(grid, scheme = c("fl", "simple"), B = 300L, reps = NULL, stratum = NULL,
+spec_null <- function(grid, scheme = c("resid", "simple", "fl"), B = 300L, reps = NULL, stratum = NULL,
                       covariates = NULL, transform = log, inverse = exp, restrict = NULL,
                       seed = 1L, dir = NULL, cores = 1L, data = NULL,
                       keep = c("estimate", "p", "rr", "p_rr", "sep_flag")) {
   scheme <- match.arg(scheme)
+  if (scheme == "fl") { message("scheme = \"fl\" is deprecated; use \"resid\" (exposure-residual permutation)"); scheme <- "resid" }
   refit <- attr(grid, "refit"); if (is.null(refit)) stop("grid has no refit function; use spec_fit() or supply refit to as_spec_grid()")
   ctx <- attr(grid, "context"); if (is.null(data)) data <- ctx$data
   if (is.null(data)) stop("data is required (not stored in this grid)")
   exposures <- unique(grid$exposure)
   for (ex in exposures) if (is.null(data[[ex]])) stop("exposure '", ex, "' not in data")
-  if (scheme == "fl" && is.null(covariates)) stop("covariates are required for the Freedman-Lane scheme")
+  if (scheme == "resid" && is.null(covariates)) stop("covariates are required for the exposure-residual scheme")
   if (is.null(reps)) reps <- seq_len(B)
   axes <- attr(grid, "axes")
   axes_null <- if (!is.null(restrict)) restrict_axes(axes, restrict) else axes
   n <- nrow(data)
   strata_idx <- if (is.null(stratum)) list(seq_len(n)) else split(seq_len(n), data[[stratum]])
-  if (scheme == "fl") {
+  if (scheme == "resid") {
     Xc <- stats::model.matrix(stats::as.formula(paste("~", paste(covariates, collapse = "+"))), data = data)
-    if (nrow(Xc) != n) stop("covariates contain missing values; the Freedman-Lane regression needs complete covariates")
+    if (nrow(Xc) != n) stop("covariates contain missing values; the residualisation regression needs complete covariates")
     L <- sapply(exposures, function(ex) transform(data[[ex]]))
     fitL <- Xc %*% qr.coef(qr(Xc), L); resL <- L - fitL
   }
