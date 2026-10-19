@@ -8,5 +8,5 @@
   ],
   "license": "MIT",
   "keywords": ["specification curve analysis", "multiverse analysis", "permutation test", "survey data", "R"],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

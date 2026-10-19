@@ -17,8 +17,8 @@
 #'   \item{y_st4_pairs, y_st4_t20, y_st4_jaw10}{Stage IV by fewer than 10 opposing pairs, fewer than 20 teeth, fewer than 10 teeth in either jaw (0/1)}
 #'   \item{WBC, ANC, AGR}{White blood cell count, neutrophil count (10^9/L), albumin-to-globulin ratio}
 #'   \item{SII, dNLR, NLR, LMR, PIV, SIRI, PLR}{Complete blood count-derived composite indices}
-#'   \item{NEU, LYM, MON, PLT, ALB, GLOB}{Constituents: neutrophils, lymphocytes, monocytes, platelets, albumin, globulin}
-#'   \item{Age, Gender, Race, Educational_level, PIR, Marriage_ststus, Smoking_status, Drinking_status, Flossing, BMI, Diabetes, Hypertension, Cardiovascular_disease, Hyperlipidemia, Arthritis, HbA1c}{Covariates (imputed where missing; factors except Age, PIR and HbA1c)}
+#'   \item{NEU, LYM, MON, PLT, ALB, GLOB}{Constituents: neutrophils, lymphocytes, monocytes, platelets, albumin, globulin. Counts in 10^9/L; MON is the monocyte percentage (LBXMOPCT) times WBC / 100}
+#'   \item{Age, Gender, Race, Educational_level, PIR, Marriage_ststus, Smoking_status, Drinking_status, Flossing, BMI, Diabetes, Hypertension, Cardiovascular_disease, Hyperlipidemia, Arthritis, HbA1c}{Covariates (imputed where missing; factors except Age and HbA1c). PIR is the family income-to-poverty ratio in three categories; Educational_level 'Less than 9th grade' is NHANES DMDEDUC2 = 1 and '9th-12th grade or high school graduate' is DMDEDUC2 = 2 or 3; Arthritis is self-reported (MCQ160A)}
 #'   \item{complete_case}{1 if all 16 covariates were observed}
 #' }
 #' @source National Health and Nutrition Examination Survey 2009-2014, \url{https://wwwn.cdc.gov/nchs/nhanes/}
