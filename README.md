@@ -64,7 +64,8 @@ public NHANES 2009–2014 files and compare them with the archived results ledge
 
 ## Citation
 
-Huang P, Zhang R. speccal: calibrated inference for specification curve analysis. R package. [manuscript in preparation]
+Huang P, Zhang R. speccal: calibrated inference for specification curve analysis. R package version 0.1.1. Zenodo; 2026.
+https://doi.org/10.5281/zenodo.23487278 (all versions: https://doi.org/10.5281/zenodo.23009336)
 
 ## License
 
